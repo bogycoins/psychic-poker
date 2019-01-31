@@ -62,77 +62,38 @@ function sortByCard(x, y) {
 }
 
 function sortByCardAceFirst(x, y) {
-    const cardARank = x.charAt(0) === 'A' ? 1 : cardRanks[x[0]];
-    const cardBRank = y.charAt(0) === 'A' ? 1 : cardRanks[y[0]];
+    const cardARank = x[0] === 'A' ? 1 : cardRanks[x[0]];
+    const cardBRank = y[0] === 'A' ? 1 : cardRanks[y[0]];
 
     return cardARank < cardBRank ? -1 : cardARank > cardBRank ? 1 : 0;
 }
 
-function isOnePair(hand) {
-    let temp = {};
+let countCards = function (hand) {
+    let result = {};
 
     hand.forEach(function (rawCard) {
         let card = rawCard[0];
-        let suit = rawCard[1];
 
-        if (!temp[card]) {
-            temp[card] = 0;
+        if (!result[card]) {
+            result[card] = 0;
         }
-        temp[card]++;
+        result[card]++;
     });
-
-    for (let card in temp) {
-        if (temp[card] === 2) {
-            return true;
-        }
-    }
-}
+    return result;
+};
 
 function isTwoPairs(hand) {
-    let temp = {};
-
-    hand.forEach(function (rawCard) {
-        let card = rawCard[0];
-        let suit = rawCard[1];
-
-        if (!temp[card]) {
-            temp[card] = 0;
-        }
-        temp[card]++;
-    });
-
-    let pairs = 0;
+    let temp = countCards(hand);
     let pairsArr = [];
 
     for (let card in temp) {
         if (temp[card] === 2) {
-            pairs++;
             pairsArr.push(card);
         }
     }
 
-    if (pairs === 2) {
+    if (pairsArr.length === 2) {
         return true;
-    }
-}
-
-function isThreeOfAKind(hand) {
-    let temp = {};
-
-    hand.forEach(function (rawCard) {
-        let card = rawCard[0];
-        let suit = rawCard[1];
-
-        if (!temp[card]) {
-            temp[card] = 0;
-        }
-        temp[card]++;
-    });
-
-    for (let card in temp) {
-        if (temp[card] === 3) {
-            return true;
-        }
     }
 }
 
@@ -152,24 +113,14 @@ function isFlush(hand) {
 }
 
 function isFullHouse(hand) {
-    return isOnePair(hand) && isThreeOfAKind(hand);
+    return isNOfAKind(hand, 2) && isNOfAKind(hand, 3);
 }
 
-function isFourOfAKind(hand) {
-    let temp = {};
-
-    hand.forEach(function (rawCard) {
-        let card = rawCard[0];
-        let suit = rawCard[1];
-
-        if (!temp[card]) {
-            temp[card] = 0;
-        }
-        temp[card]++;
-    });
+function isNOfAKind(hand, n) {
+    let temp = countCards(hand);
 
     for (let card in temp) {
-        if (temp[card] === 4) {
+        if (temp[card] === n) {
             return true;
         }
     }
@@ -185,7 +136,7 @@ function handRank(hand) {
     if (isStraightFlush(hand)) {
         return 'straight-flush';
     }
-    if (isFourOfAKind(hand)) {
+    if (isNOfAKind(hand, 4)) {
         return 'four-of-a-kind';
     }
     if (isFullHouse(hand)) {
@@ -197,13 +148,13 @@ function handRank(hand) {
     if (isStraight(hand)) {
         return 'straight';
     }
-    if (isThreeOfAKind(hand)) {
+    if (isNOfAKind(hand, 3)) {
         return 'three-of-a-kind';
     }
     if (isTwoPairs(hand)) {
         return 'two-pairs';
     }
-    if (isOnePair(hand)) {
+    if (isNOfAKind(hand, 2)) {
         return 'one-pair';
     }
 
@@ -246,8 +197,8 @@ function findBestHand(input) {
 
 let fs = require('fs');
 let input = 'input.txt';
-if(process.argv.slice(2).length){
-    input = process.argv.slice(2)[0]
+if (process.argv.slice(2).length) {
+    input = process.argv.slice(2)[0];
 }
 
 fs.readFile(input, 'utf8', function (err, contents) {
